@@ -3,13 +3,21 @@ module NaNMath
 
 using Compat
 
+# using DecFP, Quadmath
+
 const libm = Base.libm_name
 
 for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh, :log, :log2, :log10,
           :lgamma, :log1p)
     @eval begin
-        ($f)(x::Float64) = ccall(($(string(f)),libm), Float64, (Float64,), x)
-        ($f)(x::Float32) = ccall(($(string(f,"f")),libm), Float32, (Float32,), x)
+        ($f)(x::Float16)  = ccall(($(string(f,"f")),libm), Float16, (Float16,), x)
+        ($f)(x::Float32)  = ccall(($(string(f,"f")),libm), Float32, (Float32,), x)
+        ($f)(x::Float64)  = ccall(($(string(f)),libm), Float64, (Float64,), x)
+        ($f)(x::BigFloat) = ccall(($(string(f,"f")),libm), BigFloat, (BigFloat,), x)
+        ($f)(x::Dec32) = ccall(($(string(f,"f")),libm), Dec32, (Dec32,), x)
+        ($f)(x::Dec64) = ccall(($(string(f,"f")),libm), Dec64, (Dec64,), x)
+        ($f)(x::Dec128) = ccall(($(string(f,"f")),libm), Dec128, (Dec128,), x)
+        ($f)(x::Float128) = ccall(($(string(f,"f")),libm), Float128, (Float128,), x)
         ($f)(x::Real) = ($f)(float(x))
         function ($f)(x::AbstractArray{T}) where T<:Number
             Base.depwarn("$f{T<:Number}(x::AbstractArray{T}) is deprecated, use $f.(x) instead.", $f)
